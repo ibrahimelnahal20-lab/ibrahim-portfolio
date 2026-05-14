@@ -60,7 +60,7 @@ class _SkillCardState extends State<SkillCard>
           transform: _isHovered
               ? (Matrix4.identity()..translate(0.0, -6.0, 0.0))
               : Matrix4.identity(),
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppRadius.cards),
@@ -123,7 +123,7 @@ class _SkillCardState extends State<SkillCard>
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 400),
                 style: AppTextStyles.h3.copyWith(
@@ -139,16 +139,18 @@ class _SkillCardState extends State<SkillCard>
                   style: AppTextStyles.body.copyWith(height: 1.6),
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.md),
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: widget.skill.tags
-                    .map((tag) => TechChip(
-                          label: tag,
-                          isHovered: _isHovered,
-                          accentColor: widget.skill.accentColor,
-                        ))
+                    .map(
+                      (tag) => TechChip(
+                        label: tag,
+                        isHovered: _isHovered,
+                        accentColor: widget.skill.accentColor,
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -280,10 +282,10 @@ class _MobileSkillCardState extends State<_MobileSkillCard>
                 spacing: 6,
                 runSpacing: 6,
                 children: skill.tags
-                    .map((tag) => _MobileChip(
-                          label: tag,
-                          color: skill.accentColor,
-                        ))
+                    .map(
+                      (tag) =>
+                          _MobileChip(label: tag, color: skill.accentColor),
+                    )
                     .toList(),
               ),
             ],

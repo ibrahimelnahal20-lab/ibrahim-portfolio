@@ -36,7 +36,7 @@ class AppTextStyles {
     color: AppColors.text,
     height: 1.2,
   );
-  
+
   static final TextStyle statValue = GoogleFonts.spaceGrotesk(
     fontSize: 40.0,
     fontWeight: FontWeight.w700,

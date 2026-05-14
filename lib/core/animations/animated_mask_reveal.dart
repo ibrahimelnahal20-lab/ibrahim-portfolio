@@ -17,7 +17,8 @@ class AnimatedMaskReveal extends StatefulWidget {
   State<AnimatedMaskReveal> createState() => _AnimatedMaskRevealState();
 }
 
-class _AnimatedMaskRevealState extends State<AnimatedMaskReveal> with SingleTickerProviderStateMixin {
+class _AnimatedMaskRevealState extends State<AnimatedMaskReveal>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
 
@@ -28,17 +29,16 @@ class _AnimatedMaskRevealState extends State<AnimatedMaskReveal> with SingleTick
       vsync: this,
       // Slightly faster on mobile for snappier perceived performance
       duration: PlatformUtils.isMobile
-          ? Duration(milliseconds: (widget.duration.inMilliseconds * 0.7).round())
+          ? Duration(
+              milliseconds: (widget.duration.inMilliseconds * 0.7).round(),
+            )
           : widget.duration,
     );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.8),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutQuart,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
 
     Future.delayed(widget.delay, () {
       if (mounted) {
@@ -74,32 +74,35 @@ class _AnimatedMaskRevealState extends State<AnimatedMaskReveal> with SingleTick
     }
 
     // ── Desktop: full cinematic ShaderMask + ClipRect + cubic opacity ──
-    return ShaderMask(
-      shaderCallback: (bounds) {
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment(0, -0.5),
-          colors: [Colors.transparent, Colors.white],
-        ).createShader(bounds);
-      },
-      blendMode: BlendMode.dstIn,
-      child: ClipRect(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final double value = _controller.value;
-            // Delay contrast sharpening with pow
-            return Opacity(
-              opacity: (value * value * value).clamp(0.0, 1.0),
-              child: FractionalTranslation(
-                translation: _slideAnimation.value,
-                child: child,
-              ),
-            );
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final double value = _controller.value;
+        final revealedChild = Opacity(
+          opacity: (value * value * value).clamp(0.0, 1.0),
+          child: FractionalTranslation(
+            translation: _slideAnimation.value,
+            child: child,
+          ),
+        );
+
+        if (value >= 1.0) {
+          return child!;
+        }
+
+        return ShaderMask(
+          shaderCallback: (bounds) {
+            return const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment(0, -0.5),
+              colors: [Colors.transparent, Colors.white],
+            ).createShader(bounds);
           },
-          child: widget.child,
-        ),
-      ),
+          blendMode: BlendMode.dstIn,
+          child: ClipRect(child: revealedChild),
+        );
+      },
     );
   }
 }

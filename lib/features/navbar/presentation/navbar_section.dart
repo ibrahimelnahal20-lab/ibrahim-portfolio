@@ -46,6 +46,7 @@ class _NavbarSectionState extends State<NavbarSection> {
 
   void _onScroll() {
     if (!mounted) return;
+    if (!widget.scrollController.hasClients) return;
     // Only rebuild when the binary state (scrolled vs not-scrolled) actually changes
     final scrolled = widget.scrollController.offset > _scrollThreshold;
     if (scrolled != _hasScrolled) {
@@ -90,8 +91,8 @@ class _NavbarSectionState extends State<NavbarSection> {
                   ),
                 )
               : (Responsive.isMobile(context)
-                  ? _buildMobileNav()
-                  : _buildDesktopNav()),
+                    ? _buildMobileNav()
+                    : _buildDesktopNav()),
           // ── Scroll progress indicator (desktop only) ──
           if (!Responsive.isMobile(context))
             _ScrollProgressBar(scrollController: widget.scrollController),
@@ -110,18 +111,16 @@ class _NavbarSectionState extends State<NavbarSection> {
             // Logo wordmark
             GestureDetector(
               onTap: () => widget.onNavigate(SectionKeys.hero),
-              child: CursorHoverRegion(
-                child: MouseRegion(
-                  child: _buildLogo(),
-                ),
-              ),
+              child: CursorHoverRegion(child: MouseRegion(child: _buildLogo())),
             ),
             const Spacer(),
             // Nav links
-            ...(_navItems.map((item) => _NavLink(
-                  label: item.$2,
-                  onTap: () => widget.onNavigate(item.$3),
-                ))),
+            ...(_navItems.map(
+              (item) => _NavLink(
+                label: item.$2,
+                onTap: () => widget.onNavigate(item.$3),
+              ),
+            )),
             const SizedBox(width: AppSpacing.lg),
             const _GitHubLink(),
           ],
@@ -174,7 +173,10 @@ class _NavbarSectionState extends State<NavbarSection> {
       barrierColor: AppColors.bg.withValues(alpha: 0.85),
       transitionDuration: const Duration(milliseconds: 350),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutExpo);
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutExpo,
+        );
         return FadeTransition(
           opacity: curved,
           child: SlideTransition(
@@ -230,24 +232,25 @@ class _NavLinkState extends State<_NavLink> {
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            style: AppTextStyles.nav.copyWith(
-              color: _hovered ? AppColors.text : AppColors.muted,
-            ),
-            child: AnimatedLetterReveal(
-              text: widget.label.toUpperCase(),
-              staggerDelay: const Duration(milliseconds: 30),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              style: AppTextStyles.nav.copyWith(
+                color: _hovered ? AppColors.text : AppColors.muted,
+              ),
+              child: AnimatedLetterReveal(
+                text: widget.label.toUpperCase(),
+                staggerDelay: const Duration(milliseconds: 30),
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -267,46 +270,51 @@ class _GitHubLinkState extends State<_GitHubLink> {
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: () async {
-          final uri = Uri.parse('https://github.com/ibrahimelnahal20-lab');
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: _hovered ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.chips),
-            border: Border.all(
-              color: _hovered ? Colors.white.withValues(alpha: 0.2) : AppColors.border,
+        child: GestureDetector(
+          onTap: () async {
+            final uri = Uri.parse('https://github.com/ibrahimelnahal20-lab');
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: _hovered
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadius.chips),
+              border: Border.all(
+                color: _hovered
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : AppColors.border,
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.code_rounded,
-                size: 16,
-                color: _hovered ? AppColors.text : AppColors.muted,
-              ),
-              const SizedBox(width: 8),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                style: AppTextStyles.nav.copyWith(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.code_rounded,
+                  size: 16,
                   color: _hovered ? AppColors.text : AppColors.muted,
-                  fontWeight: FontWeight.w600,
                 ),
-                child: const Text('GitHub'),
-              ),
-            ],
+                const SizedBox(width: 8),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  style: AppTextStyles.nav.copyWith(
+                    color: _hovered ? AppColors.text : AppColors.muted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  child: const Text('GitHub'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -314,10 +322,7 @@ class _MobileDrawerOverlay extends StatefulWidget {
   final List<(String, String, GlobalKey)> navItems;
   final void Function(GlobalKey key) onItemTap;
 
-  const _MobileDrawerOverlay({
-    required this.navItems,
-    required this.onItemTap,
-  });
+  const _MobileDrawerOverlay({required this.navItems, required this.onItemTap});
 
   @override
   State<_MobileDrawerOverlay> createState() => _MobileDrawerOverlayState();
@@ -376,8 +381,11 @@ class _MobileDrawerOverlayState extends State<_MobileDrawerOverlay>
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: const Icon(Icons.close_rounded,
-                          color: AppColors.muted, size: 16),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: AppColors.muted,
+                        size: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -434,27 +442,35 @@ class _MobileDrawerOverlayState extends State<_MobileDrawerOverlay>
                     GestureDetector(
                       onTap: () async {
                         final uri = Uri.parse(
-                            'https://github.com/ibrahimelnahal20-lab');
+                          'https://github.com/ibrahimelnahal20-lab',
+                        );
                         if (await canLaunchUrl(uri)) await launchUrl(uri);
                       },
-                      child: Text('GITHUB ↗',
-                          style: AppTextStyles.mono.copyWith(
-                              color: AppColors.muted2,
-                              letterSpacing: 2,
-                              fontSize: 11)),
+                      child: Text(
+                        'GITHUB ↗',
+                        style: AppTextStyles.mono.copyWith(
+                          color: AppColors.muted2,
+                          letterSpacing: 2,
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.xl),
                     GestureDetector(
                       onTap: () async {
                         final uri = Uri.parse(
-                            'mailto:ibrahimelnahal20@gmail.com');
+                          'mailto:ibrahimelnahal20@gmail.com',
+                        );
                         if (await canLaunchUrl(uri)) await launchUrl(uri);
                       },
-                      child: Text('EMAIL ↗',
-                          style: AppTextStyles.mono.copyWith(
-                              color: AppColors.muted2,
-                              letterSpacing: 2,
-                              fontSize: 11)),
+                      child: Text(
+                        'EMAIL ↗',
+                        style: AppTextStyles.mono.copyWith(
+                          color: AppColors.muted2,
+                          letterSpacing: 2,
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -565,9 +581,12 @@ class _ScrollProgressBar extends StatelessWidget {
       builder: (context, _) {
         double progress = 0.0;
         if (scrollController.hasClients) {
-          final max = scrollController.position.maxScrollExtent;
-          if (max > 0) {
-            progress = (scrollController.offset / max).clamp(0.0, 1.0);
+          final position = scrollController.position;
+          if (position.hasContentDimensions && position.maxScrollExtent > 0) {
+            progress = (position.pixels / position.maxScrollExtent).clamp(
+              0.0,
+              1.0,
+            );
           }
         }
         return SizedBox(
@@ -575,9 +594,7 @@ class _ScrollProgressBar extends StatelessWidget {
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: progress,
-            child: Container(
-              color: AppColors.accent.withValues(alpha: 0.5),
-            ),
+            child: Container(color: AppColors.accent.withValues(alpha: 0.5)),
           ),
         );
       },

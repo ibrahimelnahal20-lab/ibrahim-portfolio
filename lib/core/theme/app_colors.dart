@@ -21,8 +21,8 @@ class AppColors {
 
   // Typography
   static const Color text = Color(0xFFF4F4F5);
-  static const Color muted = Color(0xFF71717A);
-  static const Color muted2 = Color(0xFF52525B);
+  static const Color muted = Color(0xFFA1A1AA);
+  static const Color muted2 = Color(0xFF8A8A93);
 
   // Code Syntax
   static const Color syntaxKeyword = Color(0xFFC084FC);
